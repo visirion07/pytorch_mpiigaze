@@ -156,6 +156,7 @@ def main():
     logger.info(config)
 
     train_loader, val_loader = create_dataloader(config, is_train=True)
+    return
     model = create_model(config)
     loss_function = create_loss(config)
     optimizer = create_optimizer(config, model)

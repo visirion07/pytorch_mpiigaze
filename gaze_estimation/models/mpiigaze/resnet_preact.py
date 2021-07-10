@@ -59,7 +59,7 @@ class Model(nn.Module):
 
         depth = 8
         base_channels = 16
-        input_shape = (1, 1, 36, 60)
+        input_shape = (1, 3, 64, 256)
 
         n_blocks_per_stage = (depth - 2) // 6
         assert n_blocks_per_stage * 6 + 2 == depth
