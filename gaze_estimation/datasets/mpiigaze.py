@@ -23,6 +23,8 @@ class OnePersonDataset(Dataset):
         # assert len(poses) == 3000
         # assert len(gazes) == 3000
         person = str(dataset_path) + "/" + person_id_str + "a.npy"
+        print(person)
+        print(image_path)
         images = []
         poses = []
         gazes = []

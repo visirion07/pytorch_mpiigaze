@@ -19,7 +19,7 @@ def create_dataset(config: yacs.config.CfgNode,
         raise ValueError
 
     dataset_dir = pathlib.Path(config.dataset.dataset_dir)
-
+    image_path = config.dataset.image_path
     assert dataset_dir.exists()
     assert config.train.test_id in range(-1, 15)
     assert config.test.test_id in range(15)
@@ -30,17 +30,17 @@ def create_dataset(config: yacs.config.CfgNode,
     if is_train:
         if config.train.test_id == -1:
             train_dataset = torch.utils.data.ConcatDataset([
-                OnePersonDataset(person_id, dataset_dir, transform)
+                OnePersonDataset(person_id, dataset_dir, image_path, transform)
                 for person_id in person_ids
             ])
-            assert len(train_dataset) == 45000
+            # assert len(train_dataset) == 45000
         else:
             test_person_id = person_ids[config.train.test_id]
             train_dataset = torch.utils.data.ConcatDataset([
-                OnePersonDataset(person_id, dataset_dir, transform)
+                OnePersonDataset(person_id, dataset_dir, image_path, transform)
                 for person_id in person_ids if person_id != test_person_id
             ])
-            assert len(train_dataset) == 42000
+            # assert len(train_dataset) == 42000
 
         val_ratio = config.train.val_ratio
         assert val_ratio < 1
@@ -50,6 +50,6 @@ def create_dataset(config: yacs.config.CfgNode,
         return torch.utils.data.dataset.random_split(train_dataset, lengths)
     else:
         test_person_id = person_ids[config.test.test_id]
-        test_dataset = OnePersonDataset(test_person_id, dataset_dir, transform)
-        assert len(test_dataset) == 3000
+        test_dataset = OnePersonDataset(test_person_id, dataset_dir, image_path, transform)
+        # assert len(test_dataset) == 3000
         return test_dataset
