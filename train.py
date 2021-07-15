@@ -124,13 +124,14 @@ def validate(epoch, model, loss_function, val_loader, config,
             loss_meter.update(loss.item(), num)
             angle_error_meter.update(angle_error.item(), num)
 
+
     logger.info(f'Epoch {epoch} '
                 f'loss {loss_meter.avg:.4f} '
                 f'angle error {angle_error_meter.avg:.2f}')
 
     elapsed = time.time() - start
     logger.info(f'Elapsed {elapsed:.2f}')
-
+    return angle_error_meter.avg
     if epoch > 0:
         tensorboard_writer.add_scalar('Val/Loss', loss_meter.avg, epoch)
         tensorboard_writer.add_scalar('Val/AngleError', angle_error_meter.avg,
@@ -147,15 +148,14 @@ def main():
     set_seeds(config.train.seed)
     setup_cudnn(config)
 
-    # output_dir = create_train_output_dir(config)
-    # save_config(config, output_dir)
-    # logger = create_logger(name=__name__,
-    #                        output_dir=output_dir,
-    #                        filename='log.txt')
-    # logger.info(config)
+    output_dir = create_train_output_dir(config)
+    save_config(config, output_dir)
+    logger = create_logger(name=__name__,
+                           output_dir=output_dir,
+                           filename='log.txt')
+    logger.info(config)
     image_path = "/content/content/processed/"
     train_loader, val_loader = create_dataloader(config, image_path, is_train=True)
-    return
     model = create_model(config)
     loss_function = create_loss(config)
     optimizer = create_optimizer(config, model)
@@ -166,10 +166,11 @@ def main():
                                 save_dir=output_dir.as_posix(),
                                 save_to_disk=True)
     tensorboard_writer = create_tensorboard_writer(config, output_dir)
-
+    best_val = 2000.0
     if config.train.val_first:
-        validate(0, model, loss_function, val_loader, config,
+        valLoss = validate(0, model, loss_function, val_loader, config,
                  tensorboard_writer, logger)
+        
 
     for epoch in range(1, config.scheduler.epochs + 1):
         train(epoch, model, optimizer, scheduler, loss_function, train_loader,
@@ -177,8 +178,12 @@ def main():
         scheduler.step()
 
         if epoch % config.train.val_period == 0:
-            validate(epoch, model, loss_function, val_loader, config,
+            valLoss = validate(epoch, model, loss_function, val_loader, config,
                      tensorboard_writer, logger)
+            if(best_val > valLoss):
+                best_val = valLoss
+            else:
+                break
 
         if (epoch % config.train.checkpoint_period == 0
                 or epoch == config.scheduler.epochs):

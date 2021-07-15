@@ -18,7 +18,7 @@ train:
   val_ratio: 0.1
   output_dir: experiments/mpiigaze/resnet_preact/exp00
   log_period: 100
-  checkpoint_period: 10
+  checkpoint_period: 1
   use_tensorboard: True
   train_dataloader:
     num_workers: 4
