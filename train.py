@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import time
-
+import numpy as np
 import torch
 import torchvision.utils
 from fvcore.common.checkpoint import Checkpointer
@@ -141,21 +141,20 @@ def validate(epoch, model, loss_function, val_loader, config,
         for name, param in model.named_parameters():
             tensorboard_writer.add_histogram(name, param, epoch)
 
-
 def main():
     config = load_config()
 
     set_seeds(config.train.seed)
     setup_cudnn(config)
 
-    output_dir = create_train_output_dir(config)
-    save_config(config, output_dir)
-    logger = create_logger(name=__name__,
-                           output_dir=output_dir,
-                           filename='log.txt')
-    logger.info(config)
-
-    train_loader, val_loader = create_dataloader(config, is_train=True)
+    # output_dir = create_train_output_dir(config)
+    # save_config(config, output_dir)
+    # logger = create_logger(name=__name__,
+    #                        output_dir=output_dir,
+    #                        filename='log.txt')
+    # logger.info(config)
+    image_path = "/content/content/processed/"
+    train_loader, val_loader = create_dataloader(config, image_path, is_train=True)
     return
     model = create_model(config)
     loss_function = create_loss(config)

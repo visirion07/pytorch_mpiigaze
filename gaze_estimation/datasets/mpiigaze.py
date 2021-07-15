@@ -1,5 +1,5 @@
 from typing import Callable, Tuple
-
+import numpy as np
 import pathlib
 import cv2
 import h5py
@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 
 
 class OnePersonDataset(Dataset):
-    def __init__(self, person_id_str: str, dataset_path: pathlib.Path, image_path: str
+    def __init__(self, person_id_str: str, dataset_path: pathlib.Path, image_path: str,
                  transform: Callable):
         self.transform = transform
 
@@ -31,11 +31,15 @@ class OnePersonDataset(Dataset):
         npfile = np.load(person, allow_pickle=True)
         for row in npfile:
             img_name = row[-3]
-            img = cv2.imread(image_path + "/" + person_id_str + img_name, 0)
+            # image_paath = image_path + img_name
+            image_paath = image_path  +  img_name.split('l')[1] + "_patch.jpg"
+            # print(image_paath)
+            img = cv2.imread(image_paath, 0)
             img = cv2.equalizeHist(img)
+            # print(img.shape, np.count_nonzero(img))
             images.append(img)
             poses.append(row[-2])
-            gaze.append(row[0])
+            gazes.append(row[0])
         self.images = np.array(images)
         self.poses = np.array(poses)
         self.gazes = np.array(gazes)

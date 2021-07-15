@@ -1,15 +1,15 @@
 from typing import Tuple, Union
-
+import numpy as np
 import yacs.config
 from torch.utils.data import DataLoader
 
 from gaze_estimation.datasets import create_dataset
 
 
-def create_dataloader(config: yacs.config.CfgNode, is_train: bool
+def create_dataloader(config: yacs.config.CfgNode, image_path, is_train: bool
                       ) -> Union[Tuple[DataLoader, DataLoader], DataLoader]:
     if is_train:
-        train_dataset, val_dataset = create_dataset(config, is_train)
+        train_dataset, val_dataset = create_dataset(config, image_path, is_train)
         train_loader = DataLoader(
             train_dataset,
             batch_size=config.train.batch_size,
@@ -28,7 +28,7 @@ def create_dataloader(config: yacs.config.CfgNode, is_train: bool
         )
         return train_loader, val_loader
     else:
-        test_dataset = create_dataset(config, is_train)
+        test_dataset = create_dataset(config, image_path, is_train)
         test_loader = DataLoader(
             test_dataset,
             batch_size=config.test.batch_size,

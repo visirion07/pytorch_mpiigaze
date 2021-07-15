@@ -1,7 +1,7 @@
 from typing import List, Union
 
 import pathlib
-
+import numpy as np
 import torch
 import yacs.config
 from torch.utils.data import Dataset
@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 from gaze_estimation import GazeEstimationMethod, create_transform
 
 
-def create_dataset(config: yacs.config.CfgNode,
+def create_dataset(config: yacs.config.CfgNode,image_path,
                    is_train: bool = True) -> Union[List[Dataset], Dataset]:
     if config.mode == GazeEstimationMethod.MPIIGaze.name:
         from .mpiigaze import OnePersonDataset
@@ -19,7 +19,6 @@ def create_dataset(config: yacs.config.CfgNode,
         raise ValueError
 
     dataset_dir = pathlib.Path(config.dataset.dataset_dir)
-    image_path = config.dataset.image_path
     assert dataset_dir.exists()
     assert config.train.test_id in range(-1, 15)
     assert config.test.test_id in range(15)
