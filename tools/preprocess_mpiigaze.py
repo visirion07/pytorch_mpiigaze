@@ -43,9 +43,9 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
     left_images = dict()
     left_poses = dict()
     left_gazes = dict()
-    right_images = dict()
-    right_poses = dict()
-    right_gazes = dict()
+    # right_images = dict()
+    # right_poses = dict()
+    # right_gazes = dict()
     filenames = dict()
     images = []
     poses = []
@@ -63,32 +63,39 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
         left_poses[day] = data.left.pose
         left_gazes[day] = data.left.gaze
 
-        right_images[day] = data.right.image
-        right_poses[day] = data.right.pose
-        right_gazes[day] = data.right.gaze
+        # right_images[day] = data.right.image
+        # right_poses[day] = data.right.pose
+        # right_gazes[day] = data.right.gaze
 
         filenames[day] = mat_data['filenames']
         
         if not isinstance(filenames[day], np.ndarray):
             left_images[day] = np.array([left_images[day]])
             left_poses[day] = np.array([left_poses[day]])
-            left_gazes[day] = np.array([left_gazes[day]])
-            right_images[day] = np.array([right_images[day]])
-            right_poses[day] = np.array([right_poses[day]])
-            right_gazes[day] = np.array([right_gazes[day]])
+            # left_gazes[day] = np.array([left_gazes[day]])
+            # right_images[day] = np.array([right_images[day]])
+            # right_poses[day] = np.array([right_poses[day]])
+            # right_gazes[day] = np.array([right_gazes[day]])
             filenames[day] = np.array([filenames[day]])
         print(person_id + "/" + day + "/" + "Filename", filenames[day].shape)
         print(person_id+ "/" + day + "/" + "Left images", left_images[day].shape)
-        print(person_id+ "/" + day + "/" + "Right images", right_images[day].shape)
+        # print(person_id+ "/" + day + "/" + "Right images", right_images[day].shape)
         print(person_id+ "/" + day + "/" + "Left Poses", left_poses[day].shape)
-        print(person_id+ "/" + day + "/" + "Right Poses", right_poses[day].shape)
+        # print(person_id+ "/" + day + "/" + "Right Poses", right_poses[day].shape)
         print(person_id+ "/" + day + "/" + "Left Gaze", left_gazes[day].shape)
-        print(person_id+ "/" + day + "/" + "Right Gaze", right_gazes[day].shape)
+        # print(person_id+ "/" + day + "/" + "Right Gaze", right_gazes[day].shape)
     for day in left_images.keys():
       num_t = left_images[day].shape[0]
       for i in range(num_t):
         datas.append(np.array([filenames[day][i], day, left_images[day][i], convert_pose(left_poses[day][i]), convert_gaze(left_gazes[day][i])]))
-    np.save("/content/Drive/MyDrive/"+ person_id + "y", datas)
+    cur_len = len(datas)
+    num_blur = cur_len // 5 
+    for i in range(num_blur):
+        kern = (3, 5)
+        imnew = cv2.blur(datas[i][2])
+        datas.append(np.array([filenames[day][i], day, imnew, convert_pose(left_poses[day][i]), convert_gaze(left_gazes[day][i])]))
+    datas = np.array(datas)
+    np.save("/content/Drive/MyDrive/"+ person_id + "z", datas)
         
     # df = get_eval_info(person_id, eval_dir)
     

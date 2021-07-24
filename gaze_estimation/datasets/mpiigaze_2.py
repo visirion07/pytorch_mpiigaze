@@ -22,13 +22,26 @@ class OnePersonDataset(Dataset):
         # assert len(images) == 3000
         # assert len(poses) == 3000
         # assert len(gazes) == 3000
-        person = str(dataset_path) + "/" + person_id_str + "y.npy"
+        person = str(dataset_path) + "/" + person_id_str + "z.npy"
+        person_from_face = str(dataset_path) + "/" + person_id_str + "b.npy"
         print(person)
         print(image_path)
+        day_lev_dic = {}
         images = []
         poses = []
         gazes = []
+        gazes_from_face = []
         npfile = np.load(person, allow_pickle=True)
+        npfile_from_face = np.load(person_from_face, allow_pickle=True)
+        print(npfile.shape)
+        print(npfile_from_face.shape)
+        print(npfile_from_face[0])
+        self.images = np.array([])
+        self.poses = np.array([])
+        self.gazes = np.array([])
+        return
+        # for row in npfile_from_face:
+            
         for row in npfile:
             # img_name = row[-3]
             # # image_paath = image_path + img_name
@@ -46,7 +59,7 @@ class OnePersonDataset(Dataset):
         print("images shape", self.images.shape)
         print("poses shape", self.poses.shape)
         print("gazes shape", self.gazes.shape)
-        
+
 
     def __getitem__(self, index: int
                     ) -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
