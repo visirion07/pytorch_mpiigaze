@@ -73,32 +73,33 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
             right_poses[day] = np.array([right_poses[day]])
             right_gazes[day] = np.array([right_gazes[day]])
             filenames[day] = np.array([filenames[day]])
+    
 
-    df = get_eval_info(person_id, eval_dir)
-    images = []
-    poses = []
-    gazes = []
-    for _, row in df.iterrows():
-        day = row.day
-        index = np.where(filenames[day] == row.filename)[0][0]
-        if row.side == 'left':
-            image = left_images[day][index]
-            pose = convert_pose(left_poses[day][index])
-            gaze = convert_gaze(left_gazes[day][index])
-        else:
-            image = right_images[day][index][:, ::-1]
-            pose = convert_pose(right_poses[day][index]) * np.array([1, -1])
-            gaze = convert_gaze(right_gazes[day][index]) * np.array([1, -1])
-        images.append(image)
-        poses.append(pose)
-        gazes.append(gaze)
-    images = np.asarray(images).astype(np.uint8)
-    poses = np.asarray(poses).astype(np.float32)
-    gazes = np.asarray(gazes).astype(np.float32)
-    with h5py.File(output_path, 'a') as f_output:
-        f_output.create_dataset(f'{person_id}/image', data=images)
-        f_output.create_dataset(f'{person_id}/pose', data=poses)
-        f_output.create_dataset(f'{person_id}/gaze', data=gazes)
+    # df = get_eval_info(person_id, eval_dir)
+    # images = []
+    # poses = []
+    # gazes = []
+    # for _, row in df.iterrows():
+    #     day = row.day
+    #     index = np.where(filenames[day] == row.filename)[0][0]
+    #     if row.side == 'left':
+    #         image = left_images[day][index]
+    #         pose = convert_pose(left_poses[day][index])
+    #         gaze = convert_gaze(left_gazes[day][index])
+    #     else:
+    #         image = right_images[day][index][:, ::-1]
+    #         pose = convert_pose(right_poses[day][index]) * np.array([1, -1])
+    #         gaze = convert_gaze(right_gazes[day][index]) * np.array([1, -1])
+    #     images.append(image)
+    #     poses.append(pose)
+    #     gazes.append(gaze)
+    # images = np.asarray(images).astype(np.uint8)
+    # poses = np.asarray(poses).astype(np.float32)
+    # gazes = np.asarray(gazes).astype(np.float32)
+    # with h5py.File(output_path, 'a') as f_output:
+    #     f_output.create_dataset(f'{person_id}/image', data=images)
+    #     f_output.create_dataset(f'{person_id}/pose', data=poses)
+    #     f_output.create_dataset(f'{person_id}/gaze', data=gazes)
 
 
 def main():
