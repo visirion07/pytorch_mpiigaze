@@ -152,8 +152,8 @@ def main():
                            output_dir=output_dir,
                            filename='log.txt')
     logger.info(config)
-
-    train_loader, val_loader = create_dataloader(config, is_train=True)
+    image_path = "/content/content/processed/"
+    train_loader, val_loader = create_dataloader(config, image_path, is_train=True)
     model = create_model(config)
     loss_function = create_loss(config)
     optimizer = create_optimizer(config, model)

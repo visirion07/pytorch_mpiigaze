@@ -39,7 +39,7 @@ def get_eval_info(person_id: str, eval_dir: pathlib.Path) -> pd.DataFrame:
 
 
 def save_one_person(person_id: str, data_dir: pathlib.Path,
-                    eval_dir: pathlib.Path, output_path: pathlib.Path) -> None:
+                    eval_dir: pathlib.Path) -> None:
     left_images = dict()
     left_poses = dict()
     left_gazes = dict()
@@ -47,6 +47,10 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
     right_poses = dict()
     right_gazes = dict()
     filenames = dict()
+    images = []
+    poses = []
+    gazes = []
+    datas = []
     person_dir = data_dir / person_id
     for path in sorted(person_dir.glob('*')):
         mat_data = scipy.io.loadmat(path.as_posix(),
@@ -64,7 +68,7 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
         right_gazes[day] = data.right.gaze
 
         filenames[day] = mat_data['filenames']
-
+        
         if not isinstance(filenames[day], np.ndarray):
             left_images[day] = np.array([left_images[day]])
             left_poses[day] = np.array([left_poses[day]])
@@ -73,12 +77,22 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
             right_poses[day] = np.array([right_poses[day]])
             right_gazes[day] = np.array([right_gazes[day]])
             filenames[day] = np.array([filenames[day]])
+        print(person_id + "/" + day + "/" + "Filename", filenames[day].shape)
+        print(person_id+ "/" + day + "/" + "Left images", left_images[day].shape)
+        print(person_id+ "/" + day + "/" + "Right images", right_images[day].shape)
+        print(person_id+ "/" + day + "/" + "Left Poses", left_poses[day].shape)
+        print(person_id+ "/" + day + "/" + "Right Poses", right_poses[day].shape)
+        print(person_id+ "/" + day + "/" + "Left Gaze", left_gazes[day].shape)
+        print(person_id+ "/" + day + "/" + "Right Gaze", right_gazes[day].shape)
+    for day in left_images.keys():
+      num_t = left_images[day].shape[0]
+      for i in range(num_t):
+        datas.append(np.array([filenames[day][i], day, left_images[day][i], left_poses[day][i], left_gazes[day][i]]))
+    np.save("/content/Drive/MyDrive/"+ person_id + "y", datas)
+        
+    # df = get_eval_info(person_id, eval_dir)
     
 
-    # df = get_eval_info(person_id, eval_dir)
-    # images = []
-    # poses = []
-    # gazes = []
     # for _, row in df.iterrows():
     #     day = row.day
     #     index = np.where(filenames[day] == row.filename)[0][0]
@@ -108,11 +122,11 @@ def main():
     parser.add_argument('--output-dir', '-o', type=str, required=True)
     args = parser.parse_args()
 
-    output_dir = pathlib.Path(args.output_dir)
-    output_dir.mkdir(exist_ok=True, parents=True)
-    output_path = output_dir / 'MPIIGaze.h5'
-    if output_path.exists():
-        raise ValueError(f'{output_path} already exists.')
+    # output_dir = pathlib.Path(args.output_dir)
+    # output_dir.mkdir(exist_ok=True, parents=True)
+    # output_path = output_dir / 'MPIIGaze.h5'
+    # if output_path.exists():
+    #     raise ValueError(f'{output_path} already exists.')
 
     dataset_dir = pathlib.Path(args.dataset)
 
@@ -120,7 +134,7 @@ def main():
         person_id = f'p{person_id:02}'
         data_dir = dataset_dir / 'Data' / 'Normalized'
         eval_dir = dataset_dir / 'Evaluation Subset' / 'sample list for eye image'
-        save_one_person(person_id, data_dir, eval_dir, output_path)
+        save_one_person(person_id, data_dir, eval_dir)
 
 
 if __name__ == '__main__':

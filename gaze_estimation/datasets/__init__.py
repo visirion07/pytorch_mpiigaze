@@ -12,7 +12,7 @@ from gaze_estimation import GazeEstimationMethod, create_transform
 def create_dataset(config: yacs.config.CfgNode,image_path,
                    is_train: bool = True) -> Union[List[Dataset], Dataset]:
     if config.mode == GazeEstimationMethod.MPIIGaze.name:
-        from .mpiigaze import OnePersonDataset
+        from .mpiigaze_2 import OnePersonDataset
     elif config.mode == GazeEstimationMethod.MPIIFaceGaze.name:
         from .mpiifacegaze import OnePersonDataset
     else:
