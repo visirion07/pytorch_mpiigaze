@@ -46,8 +46,9 @@ def main():
     output_dir = output_rootdir / checkpoint_name
     output_dir.mkdir(exist_ok=True, parents=True)
     save_config(config, output_dir)
+    image_path = "/content/content/processed/"
 
-    test_loader = create_dataloader(config, is_train=False)
+    test_loader = create_dataloader(config, image_path, is_train=False)
 
     model = create_model(config)
     checkpoint = torch.load(config.test.checkpoint, map_location='cpu')

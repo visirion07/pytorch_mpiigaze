@@ -35,7 +35,7 @@ def train(epoch, model, optimizer, scheduler, loss_function, train_loader,
     loss_meter = AverageMeter()
     angle_error_meter = AverageMeter()
     start = time.time()
-    for step, (images, poses, gazes, gazes1) in enumerate(train_loader):
+    for step, (images, poses, gazes) in enumerate(train_loader):
         if config.tensorboard.train_images and step == 0:
             image = torchvision.utils.make_grid(images,
                                                 normalize=True,
@@ -45,11 +45,11 @@ def train(epoch, model, optimizer, scheduler, loss_function, train_loader,
         images = images.to(device)
         poses = poses.to(device)
         gazes = gazes.to(device)
-        gazes1 = gazes1.to(device)
+        # gazes1 = gazes1.to(device)
         optimizer.zero_grad()
 
         if config.mode == GazeEstimationMethod.MPIIGaze.name:
-            outputs = model(images, poses, gazes1)
+            outputs = model(images, poses)
         elif config.mode == GazeEstimationMethod.MPIIFaceGaze.name:
             outputs = model(images)
         else:
@@ -134,6 +134,7 @@ def validate(epoch, model, loss_function, val_loader, config,
         tensorboard_writer.add_scalar('Val/AngleError', angle_error_meter.avg,
                                       epoch)
     tensorboard_writer.add_scalar('Val/Time', elapsed, epoch)
+    return angle_error_meter.avg
 
     if config.tensorboard.model_params:
         for name, param in model.named_parameters():
@@ -154,6 +155,7 @@ def main():
     logger.info(config)
     image_path = "/content/content/processed/"
     train_loader, val_loader = create_dataloader(config, image_path, is_train=True)
+    # return
     model = create_model(config)
     loss_function = create_loss(config)
     optimizer = create_optimizer(config, model)
@@ -164,9 +166,9 @@ def main():
                                 save_dir=output_dir.as_posix(),
                                 save_to_disk=True)
     tensorboard_writer = create_tensorboard_writer(config, output_dir)
-
+    best_val = 2000.0
     if config.train.val_first:
-        validate(0, model, loss_function, val_loader, config,
+        valLoss = validate(0, model, loss_function, val_loader, config,
                  tensorboard_writer, logger)
 
     for epoch in range(1, config.scheduler.epochs + 1):
@@ -175,8 +177,12 @@ def main():
         scheduler.step()
 
         if epoch % config.train.val_period == 0:
-            validate(epoch, model, loss_function, val_loader, config,
+            valLoss = validate(epoch, model, loss_function, val_loader, config,
                      tensorboard_writer, logger)
+            if(best_val > valLoss):
+                best_val = valLoss
+            else:
+                break
 
         if (epoch % config.train.checkpoint_period == 0
                 or epoch == config.scheduler.epochs):

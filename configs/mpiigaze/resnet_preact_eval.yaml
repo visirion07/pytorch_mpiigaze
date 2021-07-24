@@ -1,7 +1,7 @@
 mode: MPIIGaze
 device: cuda
 dataset:
-  dataset_dir: datasets/MPIIGaze.h5
+  dataset_dir: /content/Drive/MyDrive
 model:
   name: resnet_preact
 test:

@@ -87,7 +87,7 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
     for day in left_images.keys():
       num_t = left_images[day].shape[0]
       for i in range(num_t):
-        datas.append(np.array([filenames[day][i], day, left_images[day][i], left_poses[day][i], left_gazes[day][i]]))
+        datas.append(np.array([filenames[day][i], day, left_images[day][i], convert_pose(left_poses[day][i]), convert_gaze(left_gazes[day][i])]))
     np.save("/content/Drive/MyDrive/"+ person_id + "y", datas)
         
     # df = get_eval_info(person_id, eval_dir)
