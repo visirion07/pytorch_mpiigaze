@@ -23,25 +23,41 @@ class OnePersonDataset(Dataset):
         # assert len(poses) == 3000
         # assert len(gazes) == 3000
         person = str(dataset_path) + "/" + person_id_str + "z.npy"
-        person_from_face = str(dataset_path) + "/" + person_id_str + "b.npy"
+        person_f = str(dataset_path) + "/" + person_id_str + "b.npy"
+        person_g = str(dataset_path) + "/" + person_id_str + "g.npy" 
         print(person)
         print(image_path)
         day_lev_dic = {}
+        
         images = []
         poses = []
         gazes = []
-        gazes_from_face = []
+        gazes_f = []
+
+        gazes_o = {}
+        gazes_o_f = {}
+        
+        rs = {}
+        rs_f = {}
+
+        gaze_O = {} 
+
         npfile = np.load(person, allow_pickle=True)
-        npfile_from_face = np.load(person_from_face, allow_pickle=True)
+        npfile_f = np.load(person_f, allow_pickle=True)
+        npfile_g = np.load(person_g, allow_pickle=True)
         print(npfile.shape)
-        print(npfile_from_face.shape)
-        print(npfile_from_face[0])
+        print(npfile_f.shape)
+        print(npfile_g.shape)
+
         self.images = np.array([])
         self.poses = np.array([])
         self.gazes = np.array([])
-        return
+        
         # for row in npfile_from_face:
             
+        for row in npfile_g:
+
+
         for row in npfile:
             # img_name = row[-3]
             # # image_paath = image_path + img_name
@@ -53,6 +69,7 @@ class OnePersonDataset(Dataset):
             images.append(row[-3])
             poses.append(row[-2])
             gazes.append(row[-1])
+
         self.images = np.array(images)
         self.poses = np.array(poses)
         self.gazes = np.array(gazes)

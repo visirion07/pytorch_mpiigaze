@@ -72,7 +72,7 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
         if not isinstance(filenames[day], np.ndarray):
             left_images[day] = np.array([left_images[day]])
             left_poses[day] = np.array([left_poses[day]])
-            # left_gazes[day] = np.array([left_gazes[day]])
+            left_gazes[day] = np.array([left_gazes[day]])
             # right_images[day] = np.array([right_images[day]])
             # right_poses[day] = np.array([right_poses[day]])
             # right_gazes[day] = np.array([right_gazes[day]])
@@ -92,8 +92,8 @@ def save_one_person(person_id: str, data_dir: pathlib.Path,
     num_blur = cur_len // 5 
     for i in range(num_blur):
         kern = (3, 5)
-        imnew = cv2.blur(datas[i][2])
-        datas.append(np.array([filenames[day][i], day, imnew, convert_pose(left_poses[day][i]), convert_gaze(left_gazes[day][i])]))
+        imnew = cv2.blur(datas[i][2], ksize = kern)
+        datas.append(np.array([datas[i][0], datas[i][1], imnew, datas[i][3], datas[i][4]]))
     datas = np.array(datas)
     np.save("/content/Drive/MyDrive/"+ person_id + "z", datas)
         
