@@ -35,7 +35,7 @@ def train(epoch, model, optimizer, scheduler, loss_function, train_loader,
     loss_meter = AverageMeter()
     angle_error_meter = AverageMeter()
     start = time.time()
-    for step, (images, poses, gazes) in enumerate(train_loader):
+    for step, (images, poses, gazes, add1, add2) in enumerate(train_loader):
         if config.tensorboard.train_images and step == 0:
             image = torchvision.utils.make_grid(images,
                                                 normalize=True,
@@ -45,11 +45,12 @@ def train(epoch, model, optimizer, scheduler, loss_function, train_loader,
         images = images.to(device)
         poses = poses.to(device)
         gazes = gazes.to(device)
-        # gazes1 = gazes1.to(device)
+        add1 = add1.to(device)
+        add2 = add2.to(device)
         optimizer.zero_grad()
 
         if config.mode == GazeEstimationMethod.MPIIGaze.name:
-            outputs = model(images, poses)
+            outputs = model(images, poses, add1, add2)
         elif config.mode == GazeEstimationMethod.MPIIFaceGaze.name:
             outputs = model(images)
         else:
@@ -147,12 +148,12 @@ def main():
     set_seeds(config.train.seed)
     setup_cudnn(config)
 
-    output_dir = create_train_output_dir(config)
-    save_config(config, output_dir)
-    logger = create_logger(name=__name__,
-                           output_dir=output_dir,
-                           filename='log.txt')
-    logger.info(config)
+    # output_dir = create_train_output_dir(config)
+    # save_config(config, output_dir)
+    # logger = create_logger(name=__name__,
+    #                        output_dir=output_dir,
+    #                        filename='log.txt')
+    # logger.info(config)
     image_path = "/content/content/processed/"
     train_loader, val_loader = create_dataloader(config, image_path, is_train=True)
     # return

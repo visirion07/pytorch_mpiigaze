@@ -95,8 +95,13 @@ class Model(nn.Module):
             self.feature_size = self._forward_conv(
                 torch.zeros(*input_shape)).view(-1).size(0)
 
-        self.fc = nn.Linear(self.feature_size + 2, 2)
+        self.fc1 = nn.Linear(6, 3)
 
+
+
+        self.fc2 = nn.Linear(self.feature_size + 2, 2)
+
+        self.fc = nn.Linear(5, 2)
         self.apply(initialize_weights)
 
     @staticmethod
@@ -123,9 +128,15 @@ class Model(nn.Module):
         x = F.adaptive_avg_pool2d(x, output_size=1)
         return x
 
-    def forward(self, x: torch.tensor, y: torch.tensor) -> torch.tensor:
+    def forward(self, x: torch.tensor, y: torch.tensor, z1: torch.tensor, z2: torch.tensor) -> torch.tensor:
         x = self._forward_conv(x)
         x = x.view(x.size(0), -1)
         x = torch.cat([x, y], dim=1)
+        x = self.fc2(x)
+        z11 = self.fc1(z1)
+        z12 = z11 + z2
+
+        x = torch.cat([x, z12], dim=1)
         x = self.fc(x)
+
         return x
