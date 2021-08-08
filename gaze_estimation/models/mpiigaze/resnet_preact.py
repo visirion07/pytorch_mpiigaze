@@ -94,12 +94,12 @@ class Model(nn.Module):
         with torch.no_grad():
             self.feature_size = self._forward_conv(
                 torch.zeros(*input_shape)).view(-1).size(0)
-
+        print("HERES the feature size", self.feature_size)
         self.fc1 = nn.Linear(6, 3)
 
 
 
-        self.fc2 = nn.Linear(self.feature_size + 2, 2)
+        self.fc2 = nn.Linear(self.feature_size + 5, 2)
 
         self.fc = nn.Linear(5, 2)
         self.apply(initialize_weights)
@@ -128,15 +128,45 @@ class Model(nn.Module):
         x = F.adaptive_avg_pool2d(x, output_size=1)
         return x
 
-    def forward(self, x: torch.tensor, y: torch.tensor, z1: torch.tensor, z2: torch.tensor) -> torch.tensor:
+    def forward(self, x: torch.tensor, y: torch.tensor, z1: torch.tensor, z2: torch.tensor, z3: torch.tensor) -> torch.tensor:
+        if(torch.isnan(x).any()):
+          print("X has nan")
+        
+        if(torch.isnan(y).any()):
+          print("y has nan")
+
+        if(torch.isnan(z1).any()):
+          print("z1 has nan")
+        
+
+        if(torch.isnan(z2).any()):
+          print("z2 has nan")
+
+        if(torch.isnan(z3).any()):
+          print("z3 has nan")
         x = self._forward_conv(x)
         x = x.view(x.size(0), -1)
         x = torch.cat([x, y], dim=1)
-        x = self.fc2(x)
-        z11 = self.fc1(z1)
-        z12 = z11 + z2
+      
+        
+        z11 = self.fc1(z3).unsqueeze(2)
 
-        x = torch.cat([x, z12], dim=1)
-        x = self.fc(x)
+        # print("DATA SHAPE", z11.shape, z2.shape, z1.shape)
+        z12 = torch.matmul(z2, z11) + z1
+
+        norm_z12 =  torch.norm(z12, dim=1)
+        normz = torch.cat((norm_z12, norm_z12, norm_z12), dim=1)
+        # print("NORM SHAPE", z12.shape, normz.shape)
+        z12 = z12.squeeze(2)
+        z12 = torch.div(z12, normz)
+        # print("NORM SHAPE", z12.shape)
+        
+        # print("AFTER DATA TYPE", x.shape, z12.shape)
+
+        x = torch.cat((x, z12), dim = 1)
+        
+
+
+        x = self.fc2(x)
 
         return x

@@ -46,7 +46,7 @@ class OnePersonDataset(Dataset):
 
     add1  = []
     add2 = []
-
+    add3 = []
     npfile = np.load(person, allow_pickle=True)
     npfile_f = np.load(person_f, allow_pickle=True)
     npfile_g = np.load(person_g, allow_pickle=True)
@@ -63,7 +63,7 @@ class OnePersonDataset(Dataset):
     self.gazes = np.array([])
     self.add1 = np.array([])
     self.add2 = np.array([])
-
+    self.add3 = np.array([])
     for row in npfile_g:
       # print("GG", row[0].shape, row[1].shape)
       img_s = row[-1].split('l')[1].split('/')
@@ -140,18 +140,21 @@ class OnePersonDataset(Dataset):
       poses.append(row[-2])
       add1.append(gaze_O[day_][img_])
       add2.append(R[day_][img_])
-    
+      add3.append(gazes_z[day_][img_])
 
     self.images = np.array(images)
     self.poses = np.array(poses)
     self.gazes = np.array(gazes)
     self.add1 = np.array(add1)
     self.add2 = np.array(add2)
+    self.add3 = np.array(add3)
     print("images shape", self.images.shape)
     print("poses shape", self.poses.shape)
     print("gazes shape", self.gazes.shape)
     print("gazesO shape", self.add1.shape)
     print("R shape", self.add2.shape)
+    print("GAzes z shape", self.add3.shape)
+    
 
     return
 
@@ -202,7 +205,10 @@ class OnePersonDataset(Dataset):
     image = self.transform(self.images[index])
     pose = torch.from_numpy(self.poses[index])
     gaze = torch.from_numpy(self.gazes[index])
-    return image, pose, gaze
+    add1 = torch.from_numpy(self.add1[index]).float()
+    add2 = torch.from_numpy(self.add2[index]).float() 
+    add3 = torch.from_numpy(self.add3[index]).float()
+    return image, pose, gaze, add1, add2, add3
 
   def __len__(self) -> int:
     return len(self.images)
