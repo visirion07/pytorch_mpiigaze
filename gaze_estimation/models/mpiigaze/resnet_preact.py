@@ -148,7 +148,8 @@ class Model(nn.Module):
         x = x.view(x.size(0), -1)
         x = torch.cat([x, y], dim=1)
       
-        
+        # print("XXXXXXXXXX")
+        # print(x.shape)
         z11 = self.fc1(z3).unsqueeze(2)
 
         # print("DATA SHAPE", z11.shape, z2.shape, z1.shape)
@@ -164,9 +165,11 @@ class Model(nn.Module):
         # print("AFTER DATA TYPE", x.shape, z12.shape)
 
         x = torch.cat((x, z12), dim = 1)
-        
+        # print("X DATA SHAPE", x.shape)
 
 
         x = self.fc2(x)
+        # print("model(X) DATA SHAPE", x.shape)
 
-        return
+        
+        return x
