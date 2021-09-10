@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-
 import time
-import numpy as np
+
 import torch
 import torchvision.utils
 from fvcore.common.checkpoint import Checkpointer
@@ -37,7 +35,7 @@ def train(epoch, model, optimizer, scheduler, loss_function, train_loader,
     loss_meter = AverageMeter()
     angle_error_meter = AverageMeter()
     start = time.time()
-    for step, (images, poses, gazes) in enumerate(train_loader):
+    for step, (images, poses, gazes, add1, add2, gz) in enumerate(train_loader):
         if config.tensorboard.train_images and step == 0:
             image = torchvision.utils.make_grid(images,
                                                 normalize=True,
@@ -47,11 +45,13 @@ def train(epoch, model, optimizer, scheduler, loss_function, train_loader,
         images = images.to(device)
         poses = poses.to(device)
         gazes = gazes.to(device)
-
+        add1 = add1.to(device)
+        add2 = add2.to(device)
+        gz = gz.to(device)
         optimizer.zero_grad()
 
         if config.mode == GazeEstimationMethod.MPIIGaze.name:
-            outputs = model(images, poses)
+            outputs = model(images, poses, add1, add2, gz)
         elif config.mode == GazeEstimationMethod.MPIIFaceGaze.name:
             outputs = model(images)
         else:
@@ -99,7 +99,7 @@ def validate(epoch, model, loss_function, val_loader, config,
     start = time.time()
 
     with torch.no_grad():
-        for step, (images, poses, gazes) in enumerate(val_loader):
+        for step, (images, poses, gazes, add1, add2, gz) in enumerate(val_loader):
             if config.tensorboard.val_images and epoch == 0 and step == 0:
                 image = torchvision.utils.make_grid(images,
                                                     normalize=True,
@@ -109,9 +109,11 @@ def validate(epoch, model, loss_function, val_loader, config,
             images = images.to(device)
             poses = poses.to(device)
             gazes = gazes.to(device)
-
+            add1 = add1.to(device)
+            add2 = add2.to(device)
+            gz = gz.to(device)
             if config.mode == GazeEstimationMethod.MPIIGaze.name:
-                outputs = model(images, poses)
+                outputs = model(images, poses, add1, add2, gz)
             elif config.mode == GazeEstimationMethod.MPIIFaceGaze.name:
                 outputs = model(images)
             else:
@@ -124,23 +126,24 @@ def validate(epoch, model, loss_function, val_loader, config,
             loss_meter.update(loss.item(), num)
             angle_error_meter.update(angle_error.item(), num)
 
-
     logger.info(f'Epoch {epoch} '
                 f'loss {loss_meter.avg:.4f} '
-                f'angle error {angle_error_meter.avg:.2f}')
+                f'angle error { .avg:.2f}')
 
     elapsed = time.time() - start
     logger.info(f'Elapsed {elapsed:.2f}')
-    return angle_error_meter.avg
+
     if epoch > 0:
         tensorboard_writer.add_scalar('Val/Loss', loss_meter.avg, epoch)
         tensorboard_writer.add_scalar('Val/AngleError', angle_error_meter.avg,
                                       epoch)
     tensorboard_writer.add_scalar('Val/Time', elapsed, epoch)
+    return angle_error_meter.avg
 
     if config.tensorboard.model_params:
         for name, param in model.named_parameters():
             tensorboard_writer.add_histogram(name, param, epoch)
+
 
 def main():
     config = load_config()
@@ -156,7 +159,9 @@ def main():
     logger.info(config)
     image_path = "/content/content/processed/"
     train_loader, val_loader = create_dataloader(config, image_path, is_train=True)
+    # return
     model = create_model(config)
+
     loss_function = create_loss(config)
     optimizer = create_optimizer(config, model)
     scheduler = create_scheduler(config, optimizer)
@@ -170,7 +175,6 @@ def main():
     if config.train.val_first:
         valLoss = validate(0, model, loss_function, val_loader, config,
                  tensorboard_writer, logger)
-        
 
     for epoch in range(1, config.scheduler.epochs + 1):
         train(epoch, model, optimizer, scheduler, loss_function, train_loader,
