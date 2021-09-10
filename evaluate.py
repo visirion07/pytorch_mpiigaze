@@ -18,13 +18,15 @@ def test(model, test_loader, config):
     predictions = []
     gts = []
     with torch.no_grad():
-        for images, poses, gazes in tqdm.tqdm(test_loader):
+        for images, poses, gazes, add1, add2, gz in tqdm.tqdm(test_loader):
             images = images.to(device)
             poses = poses.to(device)
             gazes = gazes.to(device)
-
+            add1 = add1.to(device)
+            add2 = add2.to(device)
+            gz = gz.to(device)
             if config.mode == GazeEstimationMethod.MPIIGaze.name:
-                outputs = model(images, poses)
+                outputs = model(images, poses, add1, add2, gz)
             elif config.mode == GazeEstimationMethod.MPIIFaceGaze.name:
                 outputs = model(images)
             else:
