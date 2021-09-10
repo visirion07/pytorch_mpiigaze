@@ -1,7 +1,7 @@
 mode: MPIIGaze
 device: cuda
 dataset:
-  dataset_dir: /content/Drive/MyDrive
+  dataset_dir: /content/mpiigaze/outputs/
 model:
   name: resnet_preact
 train:
