@@ -24,7 +24,7 @@ class OnePersonDataset(Dataset):
     person = str(dataset_path) + "/" + person_id_str + "z.npy"
     person_f = str(dataset_path) + "/" + person_id_str + "b.npy"
     person_g = str(dataset_path) + "/" + person_id_str + "g.npy" 
-    person_fg = str(dataset_path) + "/" + person_id_str + "m.npy" 
+    # person_fg = str(dataset_path) + "/" + person_id_str + "m.npy" 
 
     print(person)
     print(image_path)
@@ -50,12 +50,12 @@ class OnePersonDataset(Dataset):
     npfile = np.load(person, allow_pickle=True)
     npfile_f = np.load(person_f, allow_pickle=True)
     npfile_g = np.load(person_g, allow_pickle=True)
-    npfile_fg = np.load(person_fg, allow_pickle=True)
+    # npfile_fg = np.load(person_fg, allow_pickle=True)
 
     print("HH", npfile[0][2].shape)
     print("HH", npfile_f[0][4])
     print("HH", npfile_g[0])
-    print("HH", npfile_fg[0][0])
+    # print("HH", npfile_fg[0][0])
 
 
     self.images = np.array([])
@@ -109,7 +109,10 @@ class OnePersonDataset(Dataset):
       if(day_ not in gaze_O.keys()):
         gaze_O[day_] = {}
       gaze_O[day_][img_] += row[-1]
-      gaze_O[day_][img_] = np.multiply(rs[day_][img_], gaze_O[day_][img_])
+      # print("GGGG")
+      # print(rs[day_][img_].shape, gaze_O[day_][img_].shape)
+      gaze_O[day_][img_] = np.matmul(rs[day_][img_], gaze_O[day_][img_])
+      # print(gaze_O[day_][img_].shape)
 
 
     for day_ in rs.keys():
@@ -120,7 +123,7 @@ class OnePersonDataset(Dataset):
           print("GG", img_, day_)
         else:
           rp_inv = np.linalg.inv(rp)
-          rpp = rp_norm * np.multiply(rs[day_][img_], rp_inv)
+          rpp = rp_norm * np.matmul(rs[day_][img_], rp_inv)
 
           if(day_ not in R.keys()):
             R[day_] = {}
